@@ -1,9 +1,9 @@
 <?php
 /* Bloomberg site URL */
-define('BLOOMBERG_URL', 'http://www.bloomberg.com/');
+define('BLOOMBERG_URL', 'http://www.bloomberg.com');
 
 /* URL of funds list in Indonesia */
-define('FUNDS_LIST_URL', 'http://www.bloomberg.com/markets/funds/country/indonesia/');
+define('FUNDS_LIST_URL', . BLOOMBERG_URL . '/markets/funds/country/indonesia/');
 
 /* Saved pages extension */
 define('SAVED_PAGE_EXT', '.html');
