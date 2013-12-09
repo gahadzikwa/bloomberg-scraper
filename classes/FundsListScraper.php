@@ -53,7 +53,7 @@ class FundsListScraper
         @$this->dom->load(FUNDS_LIST_PAGES_DIR . '1' . SAVED_PAGE_EXT);
         $this->xpath = new DomXPath($this->dom);
 
-        $nodes = $this->getNodesByClass('ticker_data');
+        $nodes = $this->getNodesByClass('ticker_data', 0);
         echo '<pre>';
         print_r($nodes);
     }
@@ -68,28 +68,25 @@ class FundsListScraper
      * @return  mixed   Would return FALSE if there is no matched nodes or the
      *                  requested nodes at specified index is not available.
      *                  Would return a nodeList object if there is no index 
-     *                  specified. Would return a single node obeject at 
+     *                  specified. Would return a single node object at 
      *                  specified index.
      * @access  private
      */
     private function getNodesByClass($className, $index = null)
     {
         /* Use xPath to query nodes by class name */
-        $nodes = $this->xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
-
-        /* Count total numbers of nodes */
-        $totalItems = count($nodes);
+        $nodeList = $this->xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
 
         /* If there is no nodes match, return false */
-        if ($totalItems <= 0) return false;
+        if ($nodeList->length <= 0) return false;
 
         /* If $index is not specified, return all matched nodes */
-        if (is_null($index)) return $nodes;
+        if (is_null($index)) return $nodeList;
 
         /* If requested $index is not available, return false */
-        if ($index >= $totalItems) return false;
+        if ($index >= $nodeList->length) return false;
 
         /* Return nodes at requested $index */
-        return $nodes[$index];
+        return $nodeList->item($index);
     }
 }
