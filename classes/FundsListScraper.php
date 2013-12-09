@@ -12,6 +12,9 @@ use DomXPath;
 
 class FundsListScraper
 {
+    /* Funds list table class name */
+    const FUNDS_LIST_TABLE_CLASS = 'ticker_data';
+
     /* Next page anchor class name */
     const NEXT_PAGE_CLASS = 'next_page';
 
@@ -57,7 +60,55 @@ class FundsListScraper
         $this->xpath = new DomXPath($this->dom);
 
         $nextPage = $this->getNextPageUrl();
-        var_dump($nextPage);
+        $fundsList = $this->getFundsList();
+
+        echo '<pre>';
+        print_r($fundsList);
+    }
+
+
+    /**
+     * Get fund list data
+     * 
+     * @access  private
+     * @return  array   An array that hold fund list data
+     */
+    private function getFundsList()
+    {
+        /* Get table that contain of fund list data */
+        $table = $this->getNodesByClass(self::FUNDS_LIST_TABLE_CLASS, 0);
+        $rows = $table->getElementsByTagName('tr');
+        
+        /* Loop through each row */
+        $fundsList = array();
+        for ($i = 1; $i < $rows->length; $i++) {
+            /* Extract each columns */
+            $cols = $rows->item($i)->getElementsByTagName('td');
+            $fundsList[] = array(
+                $cols->item(0)->textContent,            // Name
+                $cols->item(1)->textContent,            // Symbol
+                $cols->item(2)->textContent,            // Type
+                $cols->item(3)->textContent,            // Objective
+                $this->getFundUrl($cols->item(0))       // Get fund URL
+            );
+        }
+
+        return $fundsList;
+    }
+
+
+    /**
+     * Function to get fund URL
+     * 
+     * @param   object  A DOMNode object of a fund list row that contains fund
+     *                  URL
+     * @return  string  A URL to fund detail
+     * @access  private
+     */
+    private function getFundUrl($rowNode)
+    {
+        $anchor = $rowNode->getElementsByTagName('a')->item(0);
+        return BLOOMBERG_URL . $anchor->getAttribute('href');
     }
 
 
