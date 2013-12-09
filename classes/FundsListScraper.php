@@ -12,6 +12,9 @@ use DomXPath;
 
 class FundsListScraper
 {
+    /* Next page anchor class name */
+    const NEXT_PAGE_CLASS = 'next_page';
+
     /**
      * An instance of DomDocument class
      * 
@@ -53,9 +56,28 @@ class FundsListScraper
         @$this->dom->load(FUNDS_LIST_PAGES_DIR . '1' . SAVED_PAGE_EXT);
         $this->xpath = new DomXPath($this->dom);
 
-        $nodes = $this->getNodesByClass('ticker_data', 0);
-        echo '<pre>';
-        print_r($nodes);
+        $nextPage = $this->getNextPageUrl();
+        var_dump($nextPage);
+    }
+
+
+    /**
+     * Function to get the next page url
+     * 
+     * @return  mixed   It will return FALSE if there is no more page afterward.
+     *                  Or it will return next page url.
+     * @access  private
+     */
+    private function getNextPageUrl()
+    {
+        /* Get next page anchor node by using its class name */
+        $nextPage = $this->getNodesByClass(self::NEXT_PAGE_CLASS, 0);
+
+        /* If no next page anchor, return false */
+        if (!$nextPage) return false;
+
+        /* Or else return HREF attribute */
+        return $nextPage->getAttribute('href');
     }
 
 
