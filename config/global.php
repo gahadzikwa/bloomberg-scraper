@@ -11,3 +11,8 @@ define('SAVED_PAGE_EXT', '.html');
 define('SAVED_PAGES_DIR', 'bloomberg-pages/');
 /* Bloomberg funds list pages directory */
 define('FUNDS_LIST_PAGES_DIR', SAVED_PAGES_DIR . 'funds-list/');
+
+/* Scraped data directory */
+define('DATA_DIR', 'data/');
+/* Scraped funds list file */
+define('FUNDS_LIST_FILE', DATA_DIR . 'funds-list.csv');
