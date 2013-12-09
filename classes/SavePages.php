@@ -42,4 +42,44 @@ class SavePages
         /* Return number of pages saved */
         return $pagesSaved;
     }
+
+
+    /**
+     * Function to save fund detail web page
+     * 
+     * @param   int     $totalPages Total pages to be saved
+     * @return  int     Number of pages to be saved
+     * @access  public
+     */
+    public function saveFundPage($totalPages)
+    {
+        /* Pages saved counter */
+        $pagesSaved = 0;
+
+        /* Extract each funds list item */
+        $fundsList = file_get_contents(FUNDS_LIST_FILE);
+        $fundsList = explode("\n", $fundsList);
+
+        /* Loop through each asked pages */
+        for ($i = 0; $i < $totalPages; $i++) {
+            /* Extract each column */
+            $list = explode(',', $fundsList[$i]);
+
+            /* Get fund url */
+            $url = $list[4];
+
+            /* Get fund web page */
+            $html = file_get_contents($url);
+
+            /* If page scraped successfully, save it! */
+            if ($html !== false) {
+                $filename = FUNDS_PAGES_DIR . $i . SAVED_PAGE_EXT;  // Target file
+                file_put_contents($filename, $html);                // Save the page
+                $pagesSaved++;                                      // Increase counter
+            }
+        }
+
+        /* Return number of pages saved */
+        return $pagesSaved;
+    }
 }
