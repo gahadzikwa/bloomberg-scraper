@@ -191,11 +191,12 @@ class FundsListScraper
         /* Get next page anchor node by using its class name */
         $nextPage = $this->getNodesByClass(self::NEXT_PAGE_CLASS, 0);
 
-        /* If no next page anchor, return false */
-        if (!$nextPage) return false;
+        /* If no defined HREF attribute, return false */
+        $url = $nextPage->getAttribute('href');
+        if (!$url) return false;
 
-        /* Or else return HREF attribute */
-        return BLOOMBERG_URL . $nextPage->getAttribute('href');
+        /* Or else return the HREF attribute */
+        return BLOOMBERG_URL . $url;
     }
 
 
