@@ -118,7 +118,7 @@ class FundsListScraper
         /* Loop through each page */
         while (!$this->url) {
             /* Load DOM element of the scraped page */
-            @$this->dom->load($this->url);
+            @$this->dom->loadHTMLFile($this->url);
 
             /* Create an xPath to do a DOM query */
             $this->xpath = new DomXPath($this->dom);
