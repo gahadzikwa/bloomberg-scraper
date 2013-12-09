@@ -77,7 +77,7 @@ class FundsListScraper
         if (!$nextPage) return false;
 
         /* Or else return HREF attribute */
-        return $nextPage->getAttribute('href');
+        return BLOOMBERG_URL . $nextPage->getAttribute('href');
     }
 
 
