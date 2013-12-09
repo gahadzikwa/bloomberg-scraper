@@ -13,6 +13,7 @@ class SavePages
     /**
      * Method to save Indonesia funds list pages
      * 
+     * @param   int     $totalPages Total pages to be saved
      * @return  int     Number of pages saved
      * @access  public
      */
