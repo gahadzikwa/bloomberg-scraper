@@ -116,7 +116,7 @@ class FundsListScraper
         $fundsList = array();
 
         /* Loop through each page */
-        while (!$this->url) {
+        while ($this->url) {
             /* Load DOM element of the scraped page */
             @$this->dom->loadHTMLFile($this->url);
 
