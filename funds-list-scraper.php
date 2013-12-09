@@ -15,5 +15,5 @@ $totalFunds = $fundsListScraper->run();
 
 /* Echoing saved result */
 echo 'Bloomberg Indonesia funds list pages successfuly scraped.<br>';
-echo 'Total funds scraped: ' . $totalFunds . '<br>';
-echo '<a href="' . FUNDS_LIST_PAGES_DIR . '">Go to saved fund list pages directory</a>';
+echo 'Funds list scraped: ' . $totalFunds . '<br>';
+echo '<a href="' . FUNDS_LIST_FILE . '">Download scraped funds list</a>';
