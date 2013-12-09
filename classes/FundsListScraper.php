@@ -37,6 +37,15 @@ class FundsListScraper
 
 
     /**
+     * A URL of page to be scraped
+     * 
+     * @var     string $url
+     * @access  private
+     */
+    private $url;
+
+
+    /**
      * A class constructor
      * 
      * @return  object  An instance of FundsListScraper class
@@ -46,6 +55,9 @@ class FundsListScraper
     {
         /* Create new DomDocument object */
         $this->dom = new DomDocument();
+
+        /* Initialize first URL to be scraped */
+        $this->url = FUNDS_LIST_URL;
     }
 
 
@@ -56,14 +68,38 @@ class FundsListScraper
      */
     public function run()
     {
-        @$this->dom->load(FUNDS_LIST_PAGES_DIR . '1' . SAVED_PAGE_EXT);
-        $this->xpath = new DomXPath($this->dom);
+        /* Scrape all funds list */
+        $fundsList = $this->scrapeAllFundsList(); 
+    }
 
-        $nextPage = $this->getNextPageUrl();
-        $fundsList = $this->getFundsList();
 
-        echo '<pre>';
-        print_r($fundsList);
+    /**
+     * Function to scrape all funds list data in each page
+     * 
+     * @return  array   An array that hold all scraped funds list data
+     * @access  private
+     */
+    private function scrapeAllFundsList()
+    {
+        /* An array to hold fund list data */
+        $fundsList = array();
+
+        /* Loop through each page */
+        while (!$this->url) {
+            /* Load DOM element of the scraped page */
+            @$this->dom->load($this->url);
+
+            /* Create an xPath to do a DOM query */
+            $this->xpath = new DomXPath($this->dom);
+
+            /* Scrape fund list diplayed on the current page */
+            $fundsList = array_merge($fundsList, $this->getFundsList());
+
+            /* Get the next page URL */
+            $this->url = $this->getNextPageUrl();
+        }
+
+        return $fundsList;
     }
 
 
