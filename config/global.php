@@ -8,6 +8,6 @@ define('FUNDS_LIST_URL', 'http://www.bloomberg.com/markets/funds/country/indones
 /* Saved pages extension */
 define('SAVED_PAGE_EXT', '.html');
 /* Bloomberg saved pages directory */
-define('SAVED_PAGES_DIR', 'bloomberg-pages');
+define('SAVED_PAGES_DIR', 'bloomberg-pages/');
 /* Bloomberg funds list pages directory */
-define('FUNDS_LIST_PAGES_DIR', SAVED_PAGES_DIR . 'funds-list');
+define('FUNDS_LIST_PAGES_DIR', SAVED_PAGES_DIR . 'funds-list/');
