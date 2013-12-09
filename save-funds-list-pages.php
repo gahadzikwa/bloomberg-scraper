@@ -1,4 +1,6 @@
 <?php
+set_time_limit(0);
+
 /* Include global configuration file */
 require_once('config/global.php');
 
