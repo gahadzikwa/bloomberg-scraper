@@ -12,7 +12,7 @@ class FundsListScraper
 {
     public function run()
     {
-        $html = file_get_contents(FUNDS_LIST_PAGES_DIR . '1' . SAVED_PAGES_EXT);
+        $html = file_get_contents(FUNDS_LIST_PAGES_DIR . '1' . SAVED_PAGE_EXT);
         echo $html;
     } 
 }
