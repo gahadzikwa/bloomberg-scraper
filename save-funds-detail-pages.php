@@ -11,7 +11,7 @@ require_once('classes/SavePages.php');
 $savePages = new \BloombergScraper\SavePages();
 
 /* Save funds details pages */
-$pagesSaved = $savePages->saveFundsList(1);
+$pagesSaved = $savePages->saveFundPage(1);
 
 /* Echoing saved result */
 echo 'Bloomberg Indonesia funds detail pages successfuly saved.<br>';
