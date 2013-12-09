@@ -53,9 +53,9 @@ class FundsListScraper
         @$this->dom->load(FUNDS_LIST_PAGES_DIR . '1' . SAVED_PAGE_EXT);
         $this->xpath = new DomXPath($this->dom);
 
-        $className = 'ticker_data';
-        $nodes = $xPath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
+        $className = 'ticker_data1';
+        $nodes = $this->xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
         echo '<pre>';
-        print_r($nodes->item(0));
+        print_r($nodes);
     }
 }
