@@ -64,12 +64,43 @@ class FundsListScraper
     /**
      * Main function to scrape funds list data
      * 
+     * @return  int     Total funds list successfuly scraped
      * @access  public
      */
     public function run()
     {
         /* Scrape all funds list */
         $fundsList = $this->scrapeAllFundsList(); 
+
+        /* Write scraped data to a file */
+        $this->saveFundsList($fundsList);
+
+        /* Return total funds list scraped */
+        return count($fundsList);
+    }
+
+
+    /**
+     * Function to save scraped funds list data to a file
+     * 
+     * @param   array   An array that hold scraped funds list data
+     * @return  void
+     * @access  private
+     */
+    private function saveFundsList($fundsList)
+    {
+        /* A variable to hold funds list data ti be writen */
+        $data = '';
+
+        /* Loop through each funds list data */
+        $totalFunds = count($fundsList);
+        for ($i = 0; $i < $totalFunds; $i++) {
+            $data .= implode(',', $fundsList[$i]);      // Create a comma separated data
+            if ($i < $totalFunds - 1) $data .= "\n";    // Add a line break
+        }
+
+        /* Write data to a file */
+        file_put_contents(FUNDS_LIST_FILE, $data);
     }
 
 
