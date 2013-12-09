@@ -73,9 +73,9 @@ class SavePages
 
             /* If page scraped successfully, save it! */
             if ($html !== false) {
-                $filename = FUNDS_PAGES_DIR . $i . SAVED_PAGE_EXT;  // Target file
-                file_put_contents($filename, $html);                // Save the page
-                $pagesSaved++;                                      // Increase counter
+                $filename = FUNDS_DETAILS_PAGES_DIR . $i . SAVED_PAGE_EXT;  // Target file
+                file_put_contents($filename, $html);                        // Save the page
+                $pagesSaved++;                                              // Increase counter
             }
         }
 
