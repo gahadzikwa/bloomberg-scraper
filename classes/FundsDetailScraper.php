@@ -32,6 +32,9 @@ class FundsDetailScraper
     /* My Timezone, GMt+7 */
     const MY_TIMEZONE = 'Asia/Jakarta';
 
+    /* Span class name that hold price value */
+    const PRICE_CLASS = 'price';
+
     /**
      * An instance of DomDocument class
      * 
@@ -81,9 +84,10 @@ class FundsDetailScraper
         $symbol = $this->getFundSymbol();
         $updatedDate = $this->getLastUpdatedDate();
         $exchangeType = $this->getExchangeType();
+        $price = $this->getPrice();
 
         echo '<pre>';
-        print_r($updatedDate);
+        print_r($price);
     }
 
 
@@ -186,6 +190,22 @@ class FundsDetailScraper
         }
 
         return $exchangeType;
+    }
+
+
+    /**
+     * Funcion to get fund price
+     * 
+     * @access private
+     */
+    private function getPrice()
+    {
+        /* Get price value */
+        $price = $this->getNodesByClass(self::PRICE_CLASS, 0)->textContent;
+
+        /* Convert into a float number */
+        $price = (float) str_replace(',', '', $price);
+        return $price;
     }
 
 
