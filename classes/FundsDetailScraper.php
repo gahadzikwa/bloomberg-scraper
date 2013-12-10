@@ -38,6 +38,15 @@ class FundsDetailScraper
     /* Span class name that hold price method value */
     const PRICE_METHOD_CLASS = 'price_method_value';
 
+    /* Span class name that hold price when it's trending is up */
+    const TRENDING_UP_CLASS = 'trending_up';
+
+    /* Span class name that hold price when it's trending is down */
+    const TRENDING_DOWN_CLASS = 'trending_down';
+
+    /* Span class name that hold price when it's trending is flat */
+    const TRENDING_NONE_CLASS = 'trending_none';
+
     /**
      * An instance of DomDocument class
      * 
@@ -89,9 +98,10 @@ class FundsDetailScraper
         $exchangeType = $this->getExchangeType();
         $price = $this->getPrice();
         $priceMethod = $this->getPriceMethod();
+        $trending = $this->getTrending();
 
-        //echo '<pre>';
-        var_dump($priceMethod);
+        echo '<pre>';
+        print_r($trending);
     }
 
 
@@ -247,6 +257,56 @@ class FundsDetailScraper
 
         /* Return price method */
         return strtolower($this->cleanText($priceMethod->textContent));
+    }
+
+
+    /**
+     * Function to scrape trending data
+     * 
+     * @return  array   An array that hold trending direction, trending value
+     *                  and trending percentage
+     * @access  private
+     */
+    private function getTrending()
+    {
+        /* If trending direction is up */
+        $trending = $this->getNodesByTagClass('span', self::TRENDING_UP_CLASS, 0);
+        if ($trending) return $this->extractTrendingVal($trending, 'up');
+
+        /* If trending direction is down */
+        $trending = $this->getNodesByTagClass('span', self::TRENDING_DOWN_CLASS, 0);
+        if ($trending) return $this->extractTrendingVal($trending, 'down');
+
+        /* If price is not changing */
+        $trending = $this->getNodesByTagClass('span', self::TRENDING_NONE_CLASS, 0);
+        if ($trending) return array('none', 0, 0);
+
+        /* No trending data */
+        return array('', '', '');
+    }
+
+
+    /**
+     * Function to extract trending data
+     * 
+     * @param   object  $trendingNode   DOMNode obejct that hold trending data
+     * @param   string  $trendingDir    Trending direction, the value should be
+     *                                  'up' or 'down'
+     * @return  array   An array that hold trending direction, trending value
+     *                  and trending percentage
+     * @access  private
+     */
+    private function extractTrendingVal($trendingNode, $trendingDir)
+    {
+        /* Get trending text */
+        $trending = $this->cleanText($trendingNode->textContent);
+
+        /* Extract trending value and trending percentage */
+        $trending = explode(' ', $trending);
+        $trendingVal = (double) $trending[0];
+        $trendingPercent = (double) str_replace('%', '', $trending[1]);
+
+        return array($trendingDir, $trendingVal, $trendingPercent);
     }
 
 
