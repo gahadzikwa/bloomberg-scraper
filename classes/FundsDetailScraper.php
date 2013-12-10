@@ -134,10 +134,8 @@ class FundsDetailScraper
     private function getLastUpdatedDate()
     {
         /* Get last updated date string */
-        $date = trim($this->getNodesByClass(self::DATE_CLASS, 0)->textContent);
-
-        /* Remove any line break */
-        $date = preg_replace('/\s+/', ' ', $date);
+        $date = $this->getNodesByClass(self::DATE_CLASS, 0)->textContent;
+        $date = $this->cleanText($date);
 
         /* Remove any unwanted words */
         $date = str_replace(array('As of ', 'ET on ', '.'), '', $date);
@@ -186,7 +184,8 @@ class FundsDetailScraper
         $exchangeType = array();
         for ($i = 0; $i < $list->length; $i++) {
             $span = $list->item($i)->getElementsByTagName('span');
-            $exchangeType[] = trim($span->item(1)->textContent);    // The value is contained in the second span element
+            // The value is contained in the second span element
+            $exchangeType[] = $this->cleanText($span->item(1)->textContent);
         }
 
         return $exchangeType;
@@ -200,7 +199,8 @@ class FundsDetailScraper
      */
     private function getPrice()
     {
-        $price = $this->getNodesByTagClass('span', self::PRICE_CLASS, 0);
+        $price = $this->getNodesByTagClass('span', self::PRICE_CLASS, 0)->textContent;
+        $price = $this->cleanText($price);
         echo '<pre>';
         print_r($price);
 
@@ -270,5 +270,23 @@ class FundsDetailScraper
 
         /* Return nodes at requested $index */
         return $nodeList->item($index);
+    }
+
+
+    /**
+     * A method to clean up text: trim, remove line breaks
+     * 
+     * @param   string  A text to be cleaned up
+     * @return  string  A clean text
+     * @access  private
+     */
+    private function cleanText($text)
+    {
+        /* Convert any whitescapeces into a normal spaces */
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        /* Trim text */
+        $text = trim($text);
+        return $text;
     }
 }
