@@ -200,12 +200,11 @@ class FundsDetailScraper
      */
     private function getPrice()
     {
-        /* Get price value */
-        $price = $this->getNodesByClass(self::PRICE_CLASS, 0)->textContent;
+        $price = $this->getNodesByTagClass('span', self::PRICE_CLASS, 0);
+        echo '<pre>';
+        print_r($price);
 
-        /* Convert into a float number */
-        $price = (float) str_replace(',', '', $price);
-        return $price;
+        return 0;
     }
 
 
@@ -226,6 +225,39 @@ class FundsDetailScraper
     {
         /* Use xPath to query nodes by class name */
         $nodeList = $this->xpath->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
+
+        /* If there is no nodes match, return false */
+        if ($nodeList->length <= 0) return false;
+
+        /* If $index is not specified, return all matched nodes */
+        if (is_null($index)) return $nodeList;
+
+        /* If requested $index is not available, return false */
+        if ($index >= $nodeList->length) return false;
+
+        /* Return nodes at requested $index */
+        return $nodeList->item($index);
+    }
+
+
+    /**
+     * Function to get nodes object by tag and class name
+     * 
+     * @param   string  $tag        The HTML tag to look for
+     * @param   string  $className  The requested class name to search for
+     * @param   int     $index      An optional parameter which indicate an 
+     *                              index of node to return
+     * @return  mixed   Would return FALSE if there is no matched nodes or the
+     *                  requested nodes at specified index is not available.
+     *                  Would return a nodeList object if there is no index 
+     *                  specified. Would return a single node object at 
+     *                  specified index.
+     * @access  private
+     */
+    private function getNodesByTagClass($tag, $className, $index = null)
+    {
+        /* Use xPath to query nodes by tag and class name */
+        $nodeList = $this->xpath->query("//{$tag}[contains(concat(' ', normalize-space(@class), ' '), ' $className ')]");
 
         /* If there is no nodes match, return false */
         if ($nodeList->length <= 0) return false;
