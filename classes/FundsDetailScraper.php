@@ -73,8 +73,12 @@ class FundsDetailScraper
      */
     private function getFundName()
     {
-        fundName = $this->getNodesByClass(self::FUND_NAME_CLASS, 0)->textContent();
-        return fundName;
+        /* Get DIV that hold fund name */
+        $fundName = $this->getNodesByClass(self::FUND_NAME_CLASS, 0);
+
+        /* Extract fund name in H2 element */
+        $fundName = $fundName->getElementsByTagName('h2')->item(0)->textContent;
+        return $fundName;
     }
 
 
