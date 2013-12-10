@@ -15,6 +15,9 @@ class FundsDetailScraper
     /* DIV class name that hold fund name */
     const FUND_NAME_CLASS = 'ticker_header_top';
 
+    /* DIV class name that hold exchange type detail */
+    const EXCHANGE_TYPE_CLASS = 'exchange_type';
+
     /**
      * An instance of DomDocument class
      * 
@@ -61,7 +64,9 @@ class FundsDetailScraper
         $this->xpath = new DomXPath($this->dom);
 
         $fundName = $this->getFundName();
-        var_dump($fundName);
+        $exchangeType = $this->getExchangeType();
+        echo '<pre>';
+        print_r($exchangeType);
     }
 
 
@@ -79,6 +84,38 @@ class FundsDetailScraper
         /* Extract fund name in H2 element */
         $fundName = $fundName->getElementsByTagName('h2')->item(0)->textContent;
         return $fundName;
+    }
+
+
+    /**
+     * Function to get exchange type detail
+     * 
+     * @return  array   A numeric key array that hold exchange type detail.
+     *                  [0] => Fund type
+     *                  [1] => Objective
+     *                  [2] => Assets class
+     *                  [3] => Geographic focus
+     * @access  private
+     */
+    private function getExchangeType()
+    {
+        /* Get DIV element */
+        $list = $this->getNodesByClass(self::EXCHANGE_TYPE_CLASS, 0);
+
+        /* Get UL element */
+        $list = $list->getElementsByTagName('ul')->item(0);
+
+        /* Get all LI elements */
+        $list = $list->getElementsByTagName('li');
+
+        /* Extract exchange type detail */
+        $exchangeType = array();
+        for ($i = 0; $i < $list->length; $i++) {
+            $span = $list->item($i)->getElementsByTagName('span');
+            $exchangeType[] = trim($span->item(1)->textContent);    // The value is contained in the second span element
+        }
+
+        return $exchangeType;
     }
 
 
