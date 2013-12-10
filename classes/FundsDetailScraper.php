@@ -12,6 +12,9 @@ use DomXPath;
 
 class FundsDetailScraper
 {
+    /* DIV class name that hold fund name */
+    const FUND_NAME_CLASS = 'ticker_header_top';
+
     /**
      * An instance of DomDocument class
      * 
@@ -51,7 +54,21 @@ class FundsDetailScraper
      */
     public function run()
     {
-        
+        $fundName = $this->getFundName();
+        var_dump($fundName);
+    }
+
+
+    /**
+     * Function to get fund name
+     * 
+     * @return  string  The fund name
+     * @access  private
+     */
+    private function getFundName()
+    {
+        fundName = $this->getNodesByClass(self::FUND_NAME_CLASS, 0)->textContent();
+        return fundName;
     }
 
 
