@@ -35,6 +35,9 @@ class FundsDetailScraper
     /* Span class name that hold price value */
     const PRICE_CLASS = 'price';
 
+    /* Span class name that hold price method value */
+    const PRICE_METHOD_CLASS = 'price_method_value';
+
     /**
      * An instance of DomDocument class
      * 
@@ -85,9 +88,10 @@ class FundsDetailScraper
         $updatedDate = $this->getLastUpdatedDate();
         $exchangeType = $this->getExchangeType();
         $price = $this->getPrice();
+        $priceMethod = $this->getPriceMethod();
 
-        echo '<pre>';
-        print_r($price);
+        //echo '<pre>';
+        var_dump($priceMethod);
     }
 
 
@@ -223,6 +227,26 @@ class FundsDetailScraper
         $priceVal = (float) str_replace(',', '', $priceVal);
         
         return array($priceVal, $currency);
+    }
+
+
+    /**
+     * Function to get fund price method
+     * 
+     * @return  string  Would return a fund price method if there is any. Or an
+     *                  empty string is price method is not specified
+     * @access  private
+     */
+    private function getPriceMethod()
+    {
+        /* Get price method */
+        $priceMethod = $this->getNodesByTagClass('span', self::PRICE_METHOD_CLASS, 0);
+
+        /* If no price method specified, return en empty string */
+        if (!$priceMethod) return '';
+
+        /* Return price method */
+        return strtolower($this->cleanText($priceMethod->textContent));
     }
 
 
