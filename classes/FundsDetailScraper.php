@@ -193,18 +193,36 @@ class FundsDetailScraper
 
 
     /**
-     * Funcion to get fund price
+     * Function to get fund price and currency
      * 
-     * @access private
+     * @return  array   An array that hold both price and its currency
+     * @access  private
      */
     private function getPrice()
     {
-        $price = $this->getNodesByTagClass('span', self::PRICE_CLASS, 0)->textContent;
-        $price = $this->cleanText($price);
-        echo '<pre>';
-        print_r($price);
+        /* Get price */
+        $price = $this->getNodesByTagClass('span', self::PRICE_CLASS, 0);
+        $price = $this->cleanText($price->textContent);
 
-        return 0;
+        /* Extract price from currency */
+        $priceArr = explode(' ', $price);
+
+        /* If element contains currency */
+        if (count($priceArr) >= 2) {
+            $priceVal = $priceArr[0];
+            $currency = $priceArr[1];
+        }
+
+        /* If no currency is specified, we assumed it is an IDR */
+        else {
+            $priceVal = $price;
+            $currency = 'IDR';
+        }
+
+        /* Convert price string into a float number */
+        $priceVal = (float) str_replace(',', '', $priceVal);
+        
+        return array($priceVal, $currency);
     }
 
 
