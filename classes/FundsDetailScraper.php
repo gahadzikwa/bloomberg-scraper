@@ -54,6 +54,12 @@ class FundsDetailScraper
      */
     public function run()
     {
+        /* Load DOM element of the scraped page */
+        @$this->dom->loadHTMLFile(FUNDS_DETAILS_PAGES_DIR . 0 . SAVED_PAGE_EXT);
+
+        /* Create an xPath to do a DOM query */
+        $this->xpath = new DomXPath($this->dom);
+
         $fundName = $this->getFundName();
         var_dump($fundName);
     }
