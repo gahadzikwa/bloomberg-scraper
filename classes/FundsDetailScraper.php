@@ -15,6 +15,9 @@ class FundsDetailScraper
     /* DIV class name that hold fund name */
     const FUND_NAME_CLASS = 'ticker_header_top';
 
+    /* DIV class name that became fund header */
+    const FUND_HEADER_CLASS = 'ticker_header';
+
     /* DIV class name that hold exchange type detail */
     const EXCHANGE_TYPE_CLASS = 'exchange_type';
 
@@ -63,10 +66,11 @@ class FundsDetailScraper
         /* Create an xPath to do a DOM query */
         $this->xpath = new DomXPath($this->dom);
 
-        $fundName = $this->getFundName();
+        $name = $this->getFundName();
+        $symbol = $this->getFundSymbol();
         $exchangeType = $this->getExchangeType();
         echo '<pre>';
-        print_r($exchangeType);
+        print_r($symbol);
     }
 
 
@@ -84,6 +88,23 @@ class FundsDetailScraper
         /* Extract fund name in H2 element */
         $fundName = $fundName->getElementsByTagName('h2')->item(0)->textContent;
         return $fundName;
+    }
+
+
+    /**
+     * Function to get fund symbol
+     * 
+     * @return  string  $symbol Symbol of the current fund
+     * @access  private
+     */
+    private function getFundSymbol()
+    {
+        /* Get fund header DIV */
+        $header = $this->getNodesByClass(self::FUND_HEADER_CLASS, 0);
+
+        /* Get fund symbol */
+        $symbol = trim($header->getElementsByTagName('h3')->item(0)->textContent);
+        return $symbol;
     }
 
 
