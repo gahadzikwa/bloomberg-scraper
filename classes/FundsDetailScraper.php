@@ -9,6 +9,8 @@
 namespace BloombergScraper;
 use DomDocument;
 use DomXPath;
+use DateTime;
+use DateTimeZone;
 
 class FundsDetailScraper
 {
@@ -20,6 +22,15 @@ class FundsDetailScraper
 
     /* DIV class name that hold exchange type detail */
     const EXCHANGE_TYPE_CLASS = 'exchange_type';
+
+    /* P class name that hold last updated date */
+    const DATE_CLASS = 'fine_print';
+
+    /* Bloomberg timezone, use EST */
+    const BLOOMBERG_TIMEZONE = 'America/New_York';
+
+    /* My Timezone, GMt+7 */
+    const MY_TIMEZONE = 'Asia/Jakarta';
 
     /**
      * An instance of DomDocument class
@@ -68,9 +79,11 @@ class FundsDetailScraper
 
         $name = $this->getFundName();
         $symbol = $this->getFundSymbol();
+        $updatedDate = $this->getLastUpdatedDate();
         $exchangeType = $this->getExchangeType();
+
         echo '<pre>';
-        print_r($symbol);
+        print_r($updatedDate);
     }
 
 
@@ -103,8 +116,44 @@ class FundsDetailScraper
         $header = $this->getNodesByClass(self::FUND_HEADER_CLASS, 0);
 
         /* Get fund symbol */
-        $symbol = trim($header->getElementsByTagName('h3')->item(0)->textContent);
+        $symbol = $header->getElementsByTagName('h3')->item(0)->textContent;
         return $symbol;
+    }
+
+
+    /**
+     * Function to get last updated date
+     * 
+     * @return  string  A string representation of last updated date in GMT+7
+     * @access  private
+     */
+    private function getLastUpdatedDate()
+    {
+        /* Get last updated date string */
+        $date = trim($this->getNodesByClass(self::DATE_CLASS, 0)->textContent);
+
+        /* Remove any line break */
+        $date = preg_replace('/\s+/', ' ', $date);
+
+        /* Remove any unwanted words */
+        $date = str_replace(array('As of ', 'ET on ', '.'), '', $date);
+
+        /* Extract date parts and time part */
+        $date = explode(' ', $date);
+
+        /* Get and reformat date part */
+        $datePart = explode('/', $date[1]);
+        $datePart = $datePart[2] . '-' . $datePart[0] . '-' . $datePart[1];
+
+        /* Get time part */
+        $timePart = $date[0];
+
+        /* Create a date object and convert timezone */
+        $updatedDate = new DateTime("$datePart $timePart", new DateTimeZone(self::BLOOMBERG_TIMEZONE));
+        $updatedDate->setTimeZone(new DateTimeZone(self::MY_TIMEZONE));
+
+        /* Return string representation of last updated date */
+        return $updatedDate->format('Y-m-d H:i:s');
     }
 
 
