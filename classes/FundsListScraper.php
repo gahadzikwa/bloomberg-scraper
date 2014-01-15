@@ -193,7 +193,7 @@ class FundsListScraper
     private function getFundUrl($rowNode)
     {
         $anchor = $rowNode->getElementsByTagName('a')->item(0);
-        return BLOOMBERG_URL . $anchor->getAttribute('href');
+        return self::BLOOMBERG_URL . $anchor->getAttribute('href');
     }
 
 
@@ -214,7 +214,7 @@ class FundsListScraper
         if (!$url) return false;
 
         // Or else return the HREF attribute
-        return BLOOMBERG_URL . $url;
+        return self::BLOOMBERG_URL . $url;
     }
 
 
