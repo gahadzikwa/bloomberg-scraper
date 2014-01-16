@@ -3,13 +3,18 @@ class FundsDetailScraper
 {
     // Bloomberg base URL
     const BLOOMBERG_URL = 'http://www.bloomberg.com';
+    // Bloomberg timezone, use EST
+    const BLOOMBERG_TIMEZONE = 'America/New_York';
+    // Jakarta Timezone, GMt+7
+    const JAKARTA_TIMEZONE = 'Asia/Jakarta';
 
 
     // DIV class name that hold fund name
     const FUND_NAME_CLASS = 'ticker_header_top';
-
     // DIV class name that became fund header
     const FUND_HEADER_CLASS = 'ticker_header';
+    // P class name that hold last updated date
+    const DATE_CLASS = 'fine_print';
 
 
     /**
@@ -166,7 +171,8 @@ class FundsDetailScraper
 
         return array(
             $this->getFundName(),
-            $this->getFundSymbol()
+            $this->getFundSymbol(),
+            $this->getLastUpdatedDate()
         );
     }
 
@@ -206,6 +212,41 @@ class FundsDetailScraper
 
 
     /**
+     * Method for scraping the last updated date of the fund data
+     * 
+     * @return  string  A string representation of last updated date in GMT+7
+     * @access  private
+     */
+    private function getLastUpdatedDate()
+    {
+        // Get last updated date string 
+        $date = $this->getNodesByClass(self::DATE_CLASS, 0)->textContent;
+        $date = $this->cleanText($date);
+
+        // Remove any unwanted words
+        $date = str_replace(array('As of ', 'ET on ', '.'), '', $date);
+
+        // Extract date parts and time part
+        $date = explode(' ', $date);
+
+        // Get and reformat date part 
+        $datePart = explode('/', $date[1]);
+        $datePart = $datePart[2] . '-' . $datePart[0] . '-' . $datePart[1];
+
+        // Get time part
+        $timePart = $date[0];
+
+        // Create a date object and convert timezone
+        $updatedDate = new DateTime("$datePart $timePart", 
+            new DateTimeZone(self::BLOOMBERG_TIMEZONE));
+        $updatedDate->setTimeZone(new DateTimeZone(self::JAKARTA_TIMEZONE));
+
+        // Return string representation of last updated date
+        return $updatedDate->format('Y-m-d H:i:s');
+    }
+
+
+    /**
      * Function to get nodes object by class name
      * 
      * @param   string  $className  The requested class name to search for
@@ -234,5 +275,23 @@ class FundsDetailScraper
 
         // Return nodes at requested $index
         return $nodeList->item($index);
+    }
+
+
+    /**
+     * A method to clean up text: trim, remove line breaks
+     * 
+     * @param   string  A text to be cleaned up
+     * @return  string  A clean text
+     * @access  private
+     */
+    private function cleanText($text)
+    {
+        // Convert any whitescapeces into a normal spaces
+        $text = preg_replace('/\s+/', ' ', $text);
+
+        // Trim text
+        $text = trim($text);
+        return $text;
     }
 }
