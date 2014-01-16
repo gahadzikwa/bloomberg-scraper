@@ -8,6 +8,9 @@ class FundsDetailScraper
     // DIV class name that hold fund name
     const FUND_NAME_CLASS = 'ticker_header_top';
 
+    // DIV class name that became fund header
+    const FUND_HEADER_CLASS = 'ticker_header';
+
 
     /**
      * JSON filename that hold funds list data
@@ -162,7 +165,8 @@ class FundsDetailScraper
         $this->xpath = new DomXPath($this->dom);
 
         return array(
-            $this->getFundName()
+            $this->getFundName(),
+            $this->getFundSymbol()
         );
     }
 
@@ -181,6 +185,23 @@ class FundsDetailScraper
         // Extract fund name in H2 element
         $fundName = $fundName->getElementsByTagName('h2')->item(0)->textContent;
         return $fundName;
+    }
+
+
+    /**
+     * Function to get fund symbol
+     * 
+     * @return  string  $symbol Symbol of the current fund
+     * @access  private
+     */
+    private function getFundSymbol()
+    {
+        // Get fund header DIV
+        $header = $this->getNodesByClass(self::FUND_HEADER_CLASS, 0);
+
+        // Get fund symbol
+        $symbol = $header->getElementsByTagName('h3')->item(0)->textContent;
+        return $symbol;
     }
 
 
