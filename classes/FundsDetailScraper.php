@@ -68,7 +68,7 @@ class FundsDetailScraper
         }
 
         file_put_contents($newFundsList, json_encode($newList));
-        echo "Scraper reset: <a href='{$newFundsList}'>Funds List</a>"
+        echo "Scraper reset: <a href='{$newFundsList}'>Funds List</a>";
     }
 
 
