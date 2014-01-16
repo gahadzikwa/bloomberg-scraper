@@ -15,6 +15,8 @@ class FundsDetailScraper
     const FUND_HEADER_CLASS = 'ticker_header';
     // P class name that hold last updated date
     const DATE_CLASS = 'fine_print';
+    // DIV class name that hold exchange type detail
+    const EXCHANGE_TYPE_CLASS = 'exchange_type';
 
 
     /**
@@ -172,7 +174,8 @@ class FundsDetailScraper
         return array(
             $this->getFundName(),
             $this->getFundSymbol(),
-            $this->getLastUpdatedDate()
+            $this->getLastUpdatedDate(),
+            implode(';', $this->getExchangeType())
         );
     }
 
@@ -243,6 +246,39 @@ class FundsDetailScraper
 
         // Return string representation of last updated date
         return $updatedDate->format('Y-m-d H:i:s');
+    }
+
+
+    /**
+     * Method for retrieving exchange type detail
+     * 
+     * @return  array   A numeric key array that hold exchange type detail.
+     *                  [0] => Fund type
+     *                  [1] => Objective
+     *                  [2] => Assets class
+     *                  [3] => Geographic focus
+     * @access  private
+     */
+    private function getExchangeType()
+    {
+        // Get DIV element
+        $list = $this->getNodesByClass(self::EXCHANGE_TYPE_CLASS, 0);
+
+        // Get UL element
+        $list = $list->getElementsByTagName('ul')->item(0);
+
+        // Get all LI elements
+        $list = $list->getElementsByTagName('li');
+
+        // Extract exchange type detail
+        $exchangeType = array();
+        for ($i = 0; $i < $list->length; $i++) {
+            $span = $list->item($i)->getElementsByTagName('span');
+            // The value is contained in the second span element
+            $exchangeType[] = $this->cleanText($span->item(1)->textContent);
+        }
+
+        return $exchangeType;
     }
 
 
