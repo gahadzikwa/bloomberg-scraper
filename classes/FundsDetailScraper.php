@@ -197,7 +197,9 @@ class FundsDetailScraper
                 'Beta',
                 'Beta Ref',
                 '52 Weeks Min Range',
-                '52 Weeks Max Range'
+                '52 Weeks Max Range',
+                'Days to Maturity',
+                'Assets'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -501,11 +503,27 @@ class FundsDetailScraper
 
             return array(
                 $ytd, $month1, $month3, $year1, $year3, $year5, $beta, $betaRef,
-                $priceRange[0], $priceRange[1]
+                $priceRange[0], $priceRange[1], '', ''
             );
         }
 
-        return array('', '', '', '', '');
+        // For money market class
+        elseif ($exchangeType[2] == self::MONEY_MARKET_TYPE) {
+            $cols = $rows->item(0)->getElementsByTagName('td');
+            $daysToMaturity = $this->extractDaysToMaturity(
+                $cols->item(0)->textContent);
+            $assets = $this->extractPrice($cols->item(1)->textContent);
+            $priceRange = $this->extractRange($cols->item(2)->textContent);
+
+            $cols = $rows->item(0)->getElementsByTagName('th');
+
+            return array(
+                '', '', '', '', '', '', '', '',
+                $priceRange[0], $priceRange[1], $daysToMaturity, $assets
+            );
+        }
+
+        return array('', '', '', '', '', '', '', '', '', '', '', '');
     }
 
 
@@ -518,10 +536,10 @@ class FundsDetailScraper
      */
     private function extractPercentage($val)
     {
+        $val = $this->cleanText($val);      // Clean the text
         // If no data available, return an empty string
         if ($val == '-') return '';
 
-        $val = $this->cleanText($val);      // Clean the text
         $val = str_replace('%', '', $val);  // Remove percentage
         return (float) $val;                // Convert to float
     }
@@ -536,10 +554,9 @@ class FundsDetailScraper
      */
     private function extractFloat($val)
     {
+        $val = $this->cleanText($val);      // Clean the text
         // If no data available, return an empty string
         if ($val == '-') return '';
-
-        $val = $this->cleanText($val);      // Clean the text
         return (float) $val;                // Convert to float
     }
 
@@ -573,6 +590,39 @@ class FundsDetailScraper
     {
         $title = $this->cleanText($title);
         return str_replace(array('Beta vs ', ':'), '', $title);
+    }
+
+
+    /**
+     * Method for parsing days to maturity value
+     * 
+     * @param   string  A string to be parsed
+     * @return  string  Parsed value
+     * @access  private
+     */
+    private function extractDaysToMaturity($val)
+    {
+        $val = $this->cleanText($val);              // Clean the text
+        // If no data available, return an empty string
+        if ($val == '-') return '';
+
+        return $val;
+    }
+
+
+    /**
+     * Method for parsing price value
+     * 
+     * @param   string  A string to be parsed
+     * @return  float   Parsed value
+     * @access  private
+     */
+    private function extractPrice($val)
+    {
+        $val = $this->cleanText($val);              // Clean the text
+        // If no data available, return an empty string
+        if ($val == '-') return '';
+        return (float) str_replace(',', '', $val);  // Convert to float
     }
 
 
