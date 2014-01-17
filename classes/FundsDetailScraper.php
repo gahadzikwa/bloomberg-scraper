@@ -9,6 +9,10 @@ class FundsDetailScraper
     const JAKARTA_TIMEZONE = 'Asia/Jakarta';
     // Money Market asset class
     const MONEY_MARKET_TYPE = 'Money Market';
+    // Real Estate asset class
+    const REAL_ESTATE_TYPE = 'Real Estate';
+    // ETF fund type
+    const ETF_TYPE = 'ETF';
 
 
     // DIV class name that hold fund name
@@ -192,7 +196,7 @@ class FundsDetailScraper
         $price = $this->getPrice();
         $priceMethod = $this->getPriceMethod($exchangeType[2]);
         $trending = $this->getTrending($exchangeType[2]);
-        $snapshot = $this->getSnapshot($exchangeType[2]);
+        $snapshot = $this->getSnapshot($exchangeType);
 
         return array(
             $fundName,
@@ -428,20 +432,22 @@ class FundsDetailScraper
     /**
      * Function to scrape snapshot table
      * 
-     * @param   string  $assetClass Asset class type of the current fund
+     * @param   array   $exchangeType Exchange type data
      * @return  array   An array that hold trending direction, trending value
      *                  and trending percentage
      * @access  private
      */
-    private function getSnapshot($assetClass)
+    private function getSnapshot($exchangeType)
     {
         // Get snapshot table
         $table = $this->getNodesByClass(self::SNAPSHOT_CLASS, 0);
         // Get table row
         $rows = $table->getElementsByTagName('tr');
 
-        // For non money-market class
-        if ($assetClass != self::MONEY_MARKET_TYPE) {
+        // For non money-market class, real estate class and non ETF
+        if ($exchangeType[0] != self::ETF_TYPE && 
+          $exchangeType[2] != self::MONEY_MARKET_TYPE &&
+          $exchangeType[2] != self::REAL_ESTATE_TYPE) {
             // The first row
             $cols = $rows->item(0)->getElementsByTagName('td');
             $ytd = $this->getPercentage($cols->item(0)->textContent);
