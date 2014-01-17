@@ -7,6 +7,8 @@ class FundsDetailScraper
     const BLOOMBERG_TIMEZONE = 'America/New_York';
     // Jakarta Timezone, GMt+7
     const JAKARTA_TIMEZONE = 'Asia/Jakarta';
+    // Money Market asset class
+    const MONEY_MARKET_TYPE = 'Money Market';
 
 
     // DIV class name that hold fund name
@@ -181,14 +183,22 @@ class FundsDetailScraper
         // Create an xPath to do a DOM query
         $this->xpath = new DomXPath($this->dom);
 
+        $fundName = $this->getFundName();
+        $fundSymbol = $this->getFundSymbol();
+        $lastUpdatedDate = $this->getLastUpdatedDate();
+        $exchangeType = $this->getExchangeType();
+        $price = $this->getPrice();
+        $priceMethod = $this->getPriceMethod($exchangeType[2]);
+        $trending = $this->getTrending($exchangeType[2]);
+
         return array(
-            $this->getFundName(),
-            $this->getFundSymbol(),
-            $this->getLastUpdatedDate(),
-            implode(';', $this->getExchangeType()),
-            implode(';', $this->getPrice()),
-            $this->getPriceMethod(),
-            implode(';', $this->getTrending())
+            $fundName,
+            $fundSymbol,
+            $lastUpdatedDate,
+            implode(';', $exchangeType),
+            implode(';', $price),
+            $priceMethod,
+            implode(';', $trending)
         );
     }
 
@@ -332,12 +342,16 @@ class FundsDetailScraper
     /**
      * Method for retrieving fund price method
      * 
+     * @param   string  Asset class type of the current fund
      * @return  string  Would return a fund price method if there is any. Or an
      *                  empty string is price method is not specified
      * @access  private
      */
-    private function getPriceMethod()
+    private function getPriceMethod($assetClass)
     {
+        // If it is not a money market class, return an empty string
+        if ($assetClass != self::MONEY_MARKET_TYPE) return '';
+
         // Get price method
         $priceMethod = $this->getNodesByTagClass('span', 
             self::PRICE_METHOD_CLASS, 0);
@@ -353,12 +367,16 @@ class FundsDetailScraper
     /**
      * Function to scrape trending data
      * 
+     * @param   string  Asset class type of the current fund
      * @return  array   An array that hold trending direction, trending value
      *                  and trending percentage
      * @access  private
      */
-    private function getTrending()
+    private function getTrending($assetClass)
     {
+        // If it is a money market class, return an empty array
+        if ($assetClass == self::MONEY_MARKET_TYPE) return array('', '', '');
+
         // If trending direction is up
         $trending = $this->getNodesByTagClass('span', 
             self::TRENDING_UP_CLASS, 0);
