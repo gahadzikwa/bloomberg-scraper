@@ -126,7 +126,7 @@ class FundsDetailScraper
             $i++;
         }
 
-        // Reset restult file
+        // Reset result file
         file_put_contents($this->resultFilename, '');
 
         // Create a new list
@@ -169,6 +169,38 @@ class FundsDetailScraper
             // Inform user
             echo ($i+1) . ' Pages Scraped: ' . 
                 $this->fundsList[$i]->url . '<br>';
+        }
+
+        // Get saved funds detail
+        $result = file_get_contents($this->resultFilename);
+        if (substr($result, 0, 4) != 'Name') {
+            $header = array(
+                'Name',
+                'Symbol',
+                'Last Updated Date',
+                'Fund Type',
+                'Objective',
+                'Asset Class',
+                'Geographic Focus',
+                'Price',
+                'Currency',
+                'Price Method',
+                'Trend Dir',
+                'Trend Value',
+                'Trend Percentage',
+                'YTD',
+                '1 Month',
+                '3 Month',
+                '1 Year',
+                '3 Year',
+                '5 Year',
+                '52 Weeks Min Range',
+                '52 Weeks Max Range',
+                'Beta'
+            );
+            $header = implode(';', $header) . "\n";
+            $result = $header . $result;
+            file_put_contents($this->resultFilename, $result);
         }
 
         echo "FINISHED: <a href='{$this->resultFilename}'>Funds Detail</a>";
@@ -455,12 +487,55 @@ class FundsDetailScraper
             $year3 = $this->extractPercentage($cols->item(2)->textContent);
             $priceRange = $this->extractRange($cols->item(3)->textContent);
 
+            // The second row
+            $cols = $rows->item(1)->getElementsByTagName('td');
+            $month1 = $this->extractPercentage($cols->item(0)->textContent);
+            $year1 = $this->extractPercentage($cols->item(1)->textContent);
+            $year5 = $this->extractPercentage($cols->item(2)->textContent);
+            $beta = $this->extractFloat($cols->item(3)->textContent);
+
             return array(
-                $ytd, $month3, $year3, $priceRange[0], $priceRange[1]
+                $ytd, $month1, $month3, $year1, $year3, $year5, 
+                $priceRange[0], $priceRange[1]
             );
         }
 
         return array('', '', '', '', '');
+    }
+
+
+    /**
+     * Method for parsing percentation value
+     * 
+     * @param   string  A string to be parsed
+     * @return  float   Parsed value
+     * @access  private
+     */
+    private function extractPercentage($val)
+    {
+        // If no data available, return an empty string
+        if ($val == '-') return '';
+
+        $val = $this->cleanText($val);      // Clean the text
+        $val = str_replace('%', '', $val);  // Remove percentage
+        return (float) $val;                // Convert to float
+    }
+
+
+    /**
+     * Method for parsing float value
+     * 
+     * @param   string  A string to be parsed
+     * @return  float   Parsed value
+     * @access  private
+     */
+    private function extractFloat($val)
+    {
+        // If no data available, return an empty string
+        if ($val == '-') return '';
+
+        $val = $this->cleanText($val);      // Clean the text
+        return (float) $val;                // Convert to float
     }
 
 
@@ -562,23 +637,5 @@ class FundsDetailScraper
         // Trim text
         $text = trim($text);
         return $text;
-    }
-
-
-    /**
-     * Method for parsing percentation value
-     * 
-     * @param   string  A string to be parsed
-     * @return  float   Parsed value
-     * @access  private
-     */
-    private function extractPercentage($val)
-    {
-        // If no data available, return an empty string
-        if ($val == '-') return '';
-
-        $val = $this->cleanText($val);      // Clean the text
-        $val = str_replace('%', '', $val);  // Remove percentage
-        return (float) $val;                // Convert to float
     }
 }
