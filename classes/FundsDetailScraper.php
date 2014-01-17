@@ -29,6 +29,8 @@ class FundsDetailScraper
     const TRENDING_DOWN_CLASS = 'trending_down';
     // Span class name that hold price when it's trending is flat
     const TRENDING_NONE_CLASS = 'trending_none';
+    // Snapshot table class name
+    const SNAPSHOT_CLASS = 'snapshot_table';
 
 
     /**
@@ -190,6 +192,7 @@ class FundsDetailScraper
         $price = $this->getPrice();
         $priceMethod = $this->getPriceMethod($exchangeType[2]);
         $trending = $this->getTrending($exchangeType[2]);
+        $snapshot = $this->getSnapshot($exchangeType[2]);
 
         return array(
             $fundName,
@@ -198,7 +201,8 @@ class FundsDetailScraper
             implode(';', $exchangeType),
             implode(';', $price),
             $priceMethod,
-            implode(';', $trending)
+            implode(';', $trending),
+            implode(';', $snapshot)
         );
     }
 
@@ -367,7 +371,7 @@ class FundsDetailScraper
     /**
      * Function to scrape trending data
      * 
-     * @param   string  Asset class type of the current fund
+     * @param   string  $assetClass Asset class type of the current fund
      * @return  array   An array that hold trending direction, trending value
      *                  and trending percentage
      * @access  private
@@ -418,6 +422,57 @@ class FundsDetailScraper
         $trendingPercent = (double) str_replace('%', '', $trending[1]);
 
         return array($trendingDir, $trendingVal, $trendingPercent);
+    }
+
+
+    /**
+     * Function to scrape snapshot table
+     * 
+     * @param   string  $assetClass Asset class type of the current fund
+     * @return  array   An array that hold trending direction, trending value
+     *                  and trending percentage
+     * @access  private
+     */
+    private function getSnapshot($assetClass)
+    {
+        // Get snapshot table
+        $table = $this->getNodesByClass(self::SNAPSHOT_CLASS, 0);
+        // Get table row
+        $rows = $table->getElementsByTagName('tr');
+
+        // For non money-market class
+        if ($assetClass != self::MONEY_MARKET_TYPE) {
+            // The first row
+            $cols = $rows->item(0)->getElementsByTagName('td');
+            $ytd = $this->getPercentage($cols->item(0)->textContent);
+            $month3 = $this->getPercentage($cols->item(1)->textContent);
+            $year3 = $this->getPercentage($cols->item(2)->textContent);
+            $priceRange = $this->getPriceRange($cols->item(3)->textContent);
+
+            return array(
+                $ytd, $month3, $year3, $priceRange[0], $priceRange[1]
+            );
+        }
+
+        return array('', '', '', '', '');
+    }
+
+
+    /**
+     * Method for extracting price range
+     * 
+     * @param   string  $priceRange Price range text
+     * @return  array   An array that hold max & min of price range
+     * @access  private
+     */
+    private function getPriceRange($priceRange)
+    {
+        $priceRange = $this->cleanText($priceRange);
+        $priceRange = explode(' - ', $priceRange);
+        return array(
+            (float) str_replace(',', '', $priceRange[0]),
+            (float) str_replace(',', '', $priceRange[1])
+        );
     }
 
 
@@ -501,5 +556,20 @@ class FundsDetailScraper
         // Trim text
         $text = trim($text);
         return $text;
+    }
+
+
+    /**
+     * Method for parsing percentation value
+     * 
+     * @param   string  A string to be parsed
+     * @return  float   Parsed value
+     * @access  private
+     */
+    private function getPercentage($val)
+    {
+        $val = $this->cleanText($val);      // Clean the text
+        $val = str_replace('%', '', $val);  // Remove percentage
+        return (float) $val;                // Convert to float
     }
 }
