@@ -450,10 +450,10 @@ class FundsDetailScraper
           $exchangeType[2] != self::REAL_ESTATE_TYPE) {
             // The first row
             $cols = $rows->item(0)->getElementsByTagName('td');
-            $ytd = $this->getPercentage($cols->item(0)->textContent);
-            $month3 = $this->getPercentage($cols->item(1)->textContent);
-            $year3 = $this->getPercentage($cols->item(2)->textContent);
-            $priceRange = $this->getPriceRange($cols->item(3)->textContent);
+            $ytd = $this->extractPercentage($cols->item(0)->textContent);
+            $month3 = $this->extractPercentage($cols->item(1)->textContent);
+            $year3 = $this->extractPercentage($cols->item(2)->textContent);
+            $priceRange = $this->extractRange($cols->item(3)->textContent);
 
             return array(
                 $ytd, $month3, $year3, $priceRange[0], $priceRange[1]
@@ -471,7 +471,7 @@ class FundsDetailScraper
      * @return  array   An array that hold max & min of price range
      * @access  private
      */
-    private function getPriceRange($priceRange)
+    private function extractRange($priceRange)
     {
         $priceRange = $this->cleanText($priceRange);
         $priceRange = explode(' - ', $priceRange);
@@ -572,8 +572,11 @@ class FundsDetailScraper
      * @return  float   Parsed value
      * @access  private
      */
-    private function getPercentage($val)
+    private function extractPercentage($val)
     {
+        // If no data available, return an empty string
+        if ($val == '-') return '';
+
         $val = $this->cleanText($val);      // Clean the text
         $val = str_replace('%', '', $val);  // Remove percentage
         return (float) $val;                // Convert to float
