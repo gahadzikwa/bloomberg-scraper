@@ -194,9 +194,10 @@ class FundsDetailScraper
                 '1 Year',
                 '3 Year',
                 '5 Year',
+                'Beta',
+                'Beta Ref',
                 '52 Weeks Min Range',
-                '52 Weeks Max Range',
-                'Beta'
+                '52 Weeks Max Range'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -494,8 +495,12 @@ class FundsDetailScraper
             $year5 = $this->extractPercentage($cols->item(2)->textContent);
             $beta = $this->extractFloat($cols->item(3)->textContent);
 
+            // Get beta reference
+            $th = $rows->item(1)->getElementsByTagName('th');
+            $betaRef = $this->extractBetaRef($th->item(3)->textContent);
+
             return array(
-                $ytd, $month1, $month3, $year1, $year3, $year5, 
+                $ytd, $month1, $month3, $year1, $year3, $year5, $beta, $betaRef,
                 $priceRange[0], $priceRange[1]
             );
         }
@@ -554,6 +559,20 @@ class FundsDetailScraper
             (float) str_replace(',', '', $priceRange[0]),
             (float) str_replace(',', '', $priceRange[1])
         );
+    }
+
+
+    /**
+     * Method for extracting price range
+     * 
+     * @param   string  $title  Beta reference title
+     * @return  string  Beta reference
+     * @access  private
+     */
+    private function extractBetaRef($title)
+    {
+        $title = $this->cleanText($title);
+        return str_replace(array('Beta vs ', ':'), '', $title);
     }
 
 
