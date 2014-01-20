@@ -199,7 +199,12 @@ class FundsDetailScraper
                 '52 Weeks Min Range',
                 '52 Weeks Max Range',
                 'Days to Maturity',
-                'Assets'
+                'Assets',
+                'Open',
+                'Volume',
+                'High',
+                'Low',
+                'Primary Exchange'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -503,7 +508,8 @@ class FundsDetailScraper
 
             return array(
                 $ytd, $month1, $month3, $year1, $year3, $year5, $beta, $betaRef,
-                $priceRange[0], $priceRange[1], '', ''
+                $priceRange[0], $priceRange[1], '', '',
+                '', '', '', '', ''
             );
         }
 
@@ -519,11 +525,37 @@ class FundsDetailScraper
 
             return array(
                 '', '', '', '', '', '', '', '',
-                $priceRange[0], $priceRange[1], $daysToMaturity, $assets
+                $priceRange[0], $priceRange[1], $daysToMaturity, $assets,
+                '', '', '', '', ''
             );
         }
 
-        return array('', '', '', '', '', '', '', '', '', '', '', '');
+        // For real estate class
+        elseif ($exchangeType[2] == self::REAL_ESTATE_TYPE) {
+            // The first row
+            $cols = $rows->item(0)->getElementsByTagName('td');
+            $open = $this->extractPrice($cols->item(0)->textContent);
+            $hilo = $this->extractRange($cols->item(1)->textContent);
+            $primaryExchange = $this->cleanText($cols->item(2)->textContent);
+
+            // The second row
+            $cols = $rows->item(1)->getElementsByTagName('td');
+            $volume = $this->extractPrice($cols->item(0)->textContent);
+            $priceRange = $this->extractRange($cols->item(1)->textContent);
+            $beta = $this->extractFloat($cols->item(2)->textContent);
+
+            // Get beta reference
+            $th = $rows->item(1)->getElementsByTagName('th');
+            $betaRef = $this->extractBetaRef($th->item(2)->textContent);
+
+            return array(
+                '', '', '', '', '', '', '', $betaRef,
+                $priceRange[0], $priceRange[1], '', '',
+                $open, $volume, $hilo[0], $hilo[1], $primaryExchange
+            );
+        }
+
+        return array('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
     }
 
 
