@@ -35,6 +35,8 @@ class FundsDetailScraper
     const TRENDING_NONE_CLASS = 'trending_none';
     // Snapshot table class name
     const SNAPSHOT_CLASS = 'snapshot_table';
+    // Profile p class name
+    const PROFILE_CLASS = 'profile_no_margin';
 
 
     /**
@@ -204,7 +206,8 @@ class FundsDetailScraper
                 'Volume',
                 'High',
                 'Low',
-                'Primary Exchange'
+                'Primary Exchange',
+                'Profile'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -237,6 +240,7 @@ class FundsDetailScraper
         $priceMethod = $this->getPriceMethod($exchangeType[2]);
         $trending = $this->getTrending($exchangeType[2]);
         $snapshot = $this->getSnapshot($exchangeType);
+        $profile = $this->getProfile();
 
         return array(
             $fundName,
@@ -246,7 +250,8 @@ class FundsDetailScraper
             implode(';', $price),
             $priceMethod,
             implode(';', $trending),
-            implode(';', $snapshot)
+            implode(';', $snapshot),
+            $profile
         );
     }
 
@@ -556,6 +561,20 @@ class FundsDetailScraper
         }
 
         return array('', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
+    }
+
+
+    /**
+     * Method for retrieiving fund profile
+     * 
+     * @return  string  A short profile information of the current fund
+     * @access  private
+     */
+    private function getProfile()
+    {
+        // Get profile
+        $profile = $this->getNodesByTagClass('p', self::PROFILE_CLASS, 0);
+        return $this->cleanText($profile->textContent);
     }
 
 
