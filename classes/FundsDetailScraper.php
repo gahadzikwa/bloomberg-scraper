@@ -37,6 +37,8 @@ class FundsDetailScraper
     const SNAPSHOT_CLASS = 'snapshot_table';
     // Profile p class name
     const PROFILE_CLASS = 'profile_no_margin';
+    // Extended profile div class name
+    const EXTENDED_PROFILE_CLASS = 'extended_profile';
 
 
     /**
@@ -207,7 +209,11 @@ class FundsDetailScraper
                 'High',
                 'Low',
                 'Primary Exchange',
-                'Profile'
+                'Profile',
+                'Inception Date',
+                'Telephone',
+                'Managers',
+                'Web Site'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -241,6 +247,7 @@ class FundsDetailScraper
         $trending = $this->getTrending($exchangeType[2]);
         $snapshot = $this->getSnapshot($exchangeType);
         $profile = $this->getProfile();
+        $extendedProfile = $this->getExtendedProfile();
 
         return array(
             $fundName,
@@ -251,7 +258,8 @@ class FundsDetailScraper
             $priceMethod,
             implode(';', $trending),
             implode(';', $snapshot),
-            $profile
+            $profile,
+            implode(';', $extendedProfile)
         );
     }
 
@@ -579,6 +587,33 @@ class FundsDetailScraper
 
 
     /**
+     * Method for retrieiving fund extended profile
+     * 
+     * @return  array   An array that hold extended profile information: 
+     *                  inception date, telephone, managers, and web site
+     * @access  private
+     */
+    private function getExtendedProfile()
+    {
+        // Get extended profile DIV
+        $profile = $this->dom->getElementById(self::EXTENDED_PROFILE_CLASS);
+        // Get each column data
+        $cols = $profile->getElementsByTagName('td');
+
+        return array(
+            // Inception date
+            $this->extractDate($cols->item(0)->textContent),
+            // Telephone
+            $this->extractTelephone($cols->item(1)->textContent),
+            // Managers
+            $this->extractText($cols->item(2)->textContent),
+            // Web site
+            $this->extractHref($cols->item(3))
+        );
+    }
+
+
+    /**
      * Method for parsing percentation value
      * 
      * @param   string  A string to be parsed
@@ -609,6 +644,40 @@ class FundsDetailScraper
         // If no data available, return an empty string
         if ($val == '-') return '';
         return (float) $val;                // Convert to float
+    }
+
+
+    /**
+     * Method for parsing text value
+     * 
+     * @param   string  A string to be parsed
+     * @return  float   Parsed value
+     * @access  private
+     */
+    private function extractText($val)
+    {
+        $val = $this->cleanText($val);              // Clean the text
+        // If no data available, return an empty string
+        if ($val == '-') return '';
+        return $val;
+    }
+
+
+    /**
+     * Method for parsing link HREF
+     * 
+     * @param   object  Node item that hold anchor link element
+     * @return  string  HREF in link element
+     * @access  private
+     */
+    private function extractHref($node)
+    {
+        $link = $node->getElementsByTagName('a');
+        // If there is no link element, return an empty string
+        if ($link->length <= 0) return '';
+
+        // Return HREF data
+        return $link->item(0)->getAttribute('href');
     }
 
 
@@ -674,6 +743,48 @@ class FundsDetailScraper
         // If no data available, return an empty string
         if ($val == '-') return '';
         return (float) str_replace(',', '', $val);  // Convert to float
+    }
+
+
+    /**
+     * Method for extracting date
+     * 
+     * @param   string  $date   A date string to be parsed
+     * @return  string  Formated date string: Y-m-d
+     * @access  private
+     */
+    private function extractDate($date)
+    {
+        // Clean up date
+        $date = $this->cleanText($date);
+        // Extract date
+        $datePart = explode('-', $date);
+        // Re-contruct date: Y-m-d
+        if (strlen($datePart[2]) >= 4) {
+            $date = $datePart[2] . '-' . $datePart[0] . '-' . $datePart[1];
+        }
+
+        // Create a date object and convert timezone
+        $date = new DateTime($date, new DateTimeZone(self::JAKARTA_TIMEZONE));
+
+        // Return string representation
+        return $date->format('Y-m-d');
+    }
+
+
+    /**
+     * Method for extracting telephone
+     * 
+     * @param   string  $val    A string that hold telephone numbers
+     * @return  string  Clean telephone number
+     * @access  private
+     */
+    private function extractTelephone($val)
+    {
+        // Replace un-needed text
+        $val = str_replace(array('Tel', 'Phone', ':', '+'), '', $val);
+        // Clean up data
+        return $this->cleanText($val);
     }
 
 
