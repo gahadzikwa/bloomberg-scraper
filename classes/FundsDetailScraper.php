@@ -39,6 +39,8 @@ class FundsDetailScraper
     const PROFILE_CLASS = 'profile_no_margin';
     // Extended profile div class name
     const EXTENDED_PROFILE_CLASS = 'extended_profile';
+    // Fundamentals data table class name
+    const FUNDAMENTALS_CLASS = 'standard_stat_table';
 
 
     /**
@@ -213,7 +215,14 @@ class FundsDetailScraper
                 'Inception Date',
                 'Telephone',
                 'Managers',
-                'Web Site'
+                'Web Site',
+                'NAV Updated at',
+                'NAV',
+                'Assests Updated at',
+                'Assets',
+                'Fund Leveraged',
+                'Minimum Investment',
+                'Minimum Subsequent'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -248,6 +257,7 @@ class FundsDetailScraper
         $snapshot = $this->getSnapshot($exchangeType);
         $profile = $this->getProfile();
         $extendedProfile = $this->getExtendedProfile();
+        $fundamentals = $this->getFundamentals($exchangeType);
 
         return array(
             $fundName,
@@ -259,7 +269,8 @@ class FundsDetailScraper
             implode(';', $trending),
             implode(';', $snapshot),
             $profile,
-            implode(';', $extendedProfile)
+            implode(';', $extendedProfile),
+            implode(';', $fundamentals)
         );
     }
 
@@ -614,6 +625,58 @@ class FundsDetailScraper
 
 
     /**
+     * Function to scrape fundamentals table
+     * 
+     * @param   array   $exchangeType Exchange type data
+     * @return  array   An array that hold fundamentals data
+     * @access  private
+     */
+    private function getFundamentals($exchangeType)
+    {
+        // Get fundamentals table
+        $table = $this->getNodesByTagClass('table', 
+            self::FUNDAMENTALS_CLASS, 0);
+
+        // Initialize all field
+        $nav = array('', '');
+        $assests = array('', '');
+        $fundLeveraged = '';
+        $minInvest = '';
+        $minSubsequent = '';
+
+        // For non money-market class, real estate class and non ETF
+        if ($exchangeType[0] != self::ETF_TYPE && 
+          $exchangeType[2] != self::MONEY_MARKET_TYPE &&
+          $exchangeType[2] != self::REAL_ESTATE_TYPE) {
+            
+            // Get all column that hold data
+            $cols = $table->getElementsByTagName('td');
+
+            $nav = $this->extractDateAndPrice($cols->item(0)->textContent);
+            $assests = $this->extractDateAndPrice($cols->item(1)->textContent);
+            $fundLeveraged = $this->cleanText($cols->item(2)->textContent);
+            $minInvest = $this->extractPrice($cols->item(3)->textContent);
+            $minSubsequent = $this->extractPrice($cols->item(4)->textContent);
+        }
+
+        // For money market class
+        elseif ($exchangeType[2] == self::MONEY_MARKET_TYPE) {
+            
+        }
+
+        // For real estate class
+        elseif ($exchangeType[2] == self::REAL_ESTATE_TYPE) {
+            
+        }
+
+        return array(
+            $nav[0], $nav[1], $assests[0], $assests[1], 
+            $fundLeveraged, $minInvest, $minSubsequent
+        );
+    }
+
+
+    /**
      * Method for parsing percentation value
      * 
      * @param   string  A string to be parsed
@@ -785,6 +848,34 @@ class FundsDetailScraper
         $val = str_replace(array('Tel', 'Phone', ':', '+'), '', $val);
         // Clean up data
         return $this->cleanText($val);
+    }
+
+
+    /**
+     * Method for extracting date and price
+     * 
+     * @param   string  $val    A string that hold both date and price value
+     * @return  array   An array that hold date and price value separated
+     * @access  private
+     */
+    private function extractDateAndPrice($val)
+    {
+        // Remove un-needed characters
+        $val = str_replace(array('(on ', ')'), '', $val);
+        // Clean up text
+        $val = $this->cleanText($val);
+
+        // If there is no data, return an empty array
+        if ($val == '-') return array('', '');
+
+        // Seperate date and price
+        $data = explode(' ', $val);
+
+        // Parse and return it!
+        return array(
+            $this->extractDate($data[0]),
+            $this->extractPrice($data[1])
+        );
     }
 
 
