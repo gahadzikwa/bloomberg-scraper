@@ -222,7 +222,11 @@ class FundsDetailScraper
                 'Assets',
                 'Fund Leveraged',
                 'Minimum Investment',
-                'Minimum Subsequent'
+                'Minimum Subsequent',
+                'Shares Out',
+                'Market Cap',
+                '% Premium',
+                'Average 52-Weeks % Premium'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -643,6 +647,10 @@ class FundsDetailScraper
         $fundLeveraged = '';
         $minInvest = '';
         $minSubsequent = '';
+        $sharesOut = '';
+        $marketCap = '';
+        $premiumPercent = '';
+        $avgPremiumPercent = '';
 
         // For non money-market class, real estate class and non ETF
         if ($exchangeType[0] != self::ETF_TYPE && 
@@ -659,19 +667,28 @@ class FundsDetailScraper
             $minSubsequent = $this->extractPrice($cols->item(4)->textContent);
         }
 
-        // For money market class
-        elseif ($exchangeType[2] == self::MONEY_MARKET_TYPE) {
+        // For ETF type or real estate class
+        elseif ($exchangeType[0] == self::ETF_TYPE || 
+            $exchangeType[2] == self::REAL_ESTATE_TYPE) {
             
-        }
+            // Get all column that hold data
+            $cols = $table->getElementsByTagName('td');
 
-        // For real estate class
-        elseif ($exchangeType[2] == self::REAL_ESTATE_TYPE) {
-            
+            $nav = $this->extractDateAndPrice($cols->item(0)->textContent);
+            $assests = $this->extractDateAndPrice($cols->item(1)->textContent);
+            $sharesOut = $this->extractPrice($cols->item(2)->textContent);
+            $marketCap = $this->extractPrice($cols->item(3)->textContent);
+            $premiumPercent = $this->extractPercentage(
+                $cols->item(4)->textContent);
+            $avgPremiumPercent = $this->extractPercentage(
+                $cols->item(5)->textContent);
+            $fundLeveraged = $this->cleanText($cols->item(6)->textContent);
         }
 
         return array(
             $nav[0], $nav[1], $assests[0], $assests[1], 
-            $fundLeveraged, $minInvest, $minSubsequent
+            $fundLeveraged, $minInvest, $minSubsequent,
+            $sharesOut, $marketCap, $premiumPercent, $avgPremiumPercent
         );
     }
 
