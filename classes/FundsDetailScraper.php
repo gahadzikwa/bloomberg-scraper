@@ -39,8 +39,10 @@ class FundsDetailScraper
     const PROFILE_CLASS = 'profile_no_margin';
     // Extended profile div class name
     const EXTENDED_PROFILE_CLASS = 'extended_profile';
-    // Fundamentals data table class name
-    const FUNDAMENTALS_CLASS = 'standard_stat_table';
+    // Stat data table class name
+    const STAT_TABLE_CLASS = 'standard_stat_table';
+    // Standard stat DIV class name
+    const STANDARD_STAT_CLASS = 'standard_stat';
 
 
     /**
@@ -226,7 +228,13 @@ class FundsDetailScraper
                 'Shares Out',
                 'Market Cap',
                 '% Premium',
-                'Average 52-Weeks % Premium'
+                'Average 52-Weeks % Premium',
+                'Front Load',
+                'Back Load',
+                'Current Mgmt Fee',
+                'Redemption Fee',
+                '12b1 Fee',
+                'Expense Ration'
             );
             $header = implode(';', $header) . "\n";
             $result = $header . $result;
@@ -262,6 +270,7 @@ class FundsDetailScraper
         $profile = $this->getProfile();
         $extendedProfile = $this->getExtendedProfile();
         $fundamentals = $this->getFundamentals($exchangeType);
+        $fees = $this->getFees($exchangeType);
 
         return array(
             $fundName,
@@ -274,7 +283,8 @@ class FundsDetailScraper
             implode(';', $snapshot),
             $profile,
             implode(';', $extendedProfile),
-            implode(';', $fundamentals)
+            implode(';', $fundamentals),
+            implode(';', $fees)
         );
     }
 
@@ -639,7 +649,7 @@ class FundsDetailScraper
     {
         // Get fundamentals table
         $table = $this->getNodesByTagClass('table', 
-            self::FUNDAMENTALS_CLASS, 0);
+            self::STAT_TABLE_CLASS, 0);
 
         // Initialize all field
         $nav = array('', '');
@@ -689,6 +699,63 @@ class FundsDetailScraper
             $nav[0], $nav[1], $assests[0], $assests[1], 
             $fundLeveraged, $minInvest, $minSubsequent,
             $sharesOut, $marketCap, $premiumPercent, $avgPremiumPercent
+        );
+    }
+
+
+    /**
+     * Function to scrape fees and expenses table
+     * 
+     * @param   array   $exchangeType Exchange type data
+     * @return  array   An array that hold fees and expenses data
+     * @access  private
+     */
+    private function getFees($exchangeType)
+    {
+        // Initialize all field
+        $frontLoad = '';
+        $backLoad = '';
+        $mgmtFee = '';
+        $redemptionFee = '';
+        $fee12b1 = '';
+        $expenseRatio = '';
+
+        // For non-ETF type, non money market or real estate class
+        if ($exchangeType[0] != self::ETF_TYPE && 
+          $exchangeType[2] != self::MONEY_MARKET_TYPE &&
+          $exchangeType[2] != self::REAL_ESTATE_TYPE) {
+
+            // Get fees and expenses div
+            $div = $this->getNodesByTagClass('div', 
+                self::STANDARD_STAT_CLASS, 2);
+            $table = $div->getElementsByTagName('table')->item(0);
+            
+            // Get all column that hold data
+            $cols = $table->getElementsByTagName('td');
+            $frontLoad = $this->extractFloat($cols->item(0)->textContent);
+            $backLoad = $this->extractFloat($cols->item(1)->textContent);
+            $mgmtFee = $this->extractFloat($cols->item(2)->textContent);
+            $redemptionFee = $this->extractFloat($cols->item(3)->textContent);
+            $fee12b1 = $this->extractFloat($cols->item(4)->textContent);
+            $expenseRatio = $this->extractFloat($cols->item(5)->textContent);
+        }
+
+        // For money market class
+        elseif ($exchangeType[2] == self::MONEY_MARKET_TYPE) {
+
+            // Get fees and expenses div
+            $table = $this->getNodesByTagClass('table', 
+                self::STAT_TABLE_CLASS, 0);
+            
+            // Get all column that hold data
+            $cols = $table->getElementsByTagName('td');
+            $mgmtFee = $this->extractFloat($cols->item(0)->textContent);
+            $expenseRatio = $this->extractFloat($cols->item(1)->textContent);
+        }
+
+        return array(
+            $frontLoad, $backLoad, $mgmtFee, $redemptionFee, 
+            $fee12b1, $expenseRatio
         );
     }
 
