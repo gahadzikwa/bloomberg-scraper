@@ -124,14 +124,12 @@ class FundsDetailScraper
     public function reset($fundsList, $newFundsList)
     {
         $fundsList = json_decode(file_get_contents($fundsList))->list;
-        $i = 1;
         $newList = array();
         foreach ($fundsList as $fund) {
             array_push($newList, array(
-                'url'       => "samples/funds-detail/{$i}.html",
+                'url'       => $fund[4],
                 'scraped'   => false
             ));
-            $i++;
         }
 
         // Reset result file
